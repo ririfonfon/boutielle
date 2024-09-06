@@ -40,11 +40,11 @@ FASTLED_USING_NAMESPACE
 //
 // -Mark Kriegsman, December 2014
 
-#define DATA_PIN 32
+#define DATA_PIN 13
 // #define CLK_PIN   4
 #define LED_TYPE WS2811
 #define COLOR_ORDER GRB
-#define NUM_LEDS 64
+#define NUM_LEDS 6
 CRGB leds[NUM_LEDS];
 
 // #define BRIGHTNESS          96
@@ -54,7 +54,8 @@ CRGB leds[NUM_LEDS];
 // uint8_t gCurrentPatternNumber = 0; // Index number of which pattern is current
 // #include "effect.h"
 
-void test_fast_led(){
+void test_fast_led()
+{
   leds[0] = CRGB::Red;
   FastLED.show();
   delay(500);
@@ -68,6 +69,18 @@ void test_fast_led(){
   FastLED.show();
   delay(500);
 };
+
+void callback(const uint8_t *data, const uint16_t size)
+{
+  // you can also use pre-defined callbacks
+  for (size_t pixel = 0; pixel < NUM_LEDS; ++pixel)
+  {
+    size_t idx = pixel * 3;
+    leds[pixel].r = data[idx + 0];
+    leds[pixel].g = data[idx + 1];
+    leds[pixel].b = data[idx + 2];
+  }
+}
 
 void setup()
 {
@@ -99,7 +112,8 @@ void setup()
 
   artnet_in.begin(); // artnet.begin(net, subnet); // optionally you can change net and subnet
                      // artnet_in.subscribe(universe_in, onArtnet);
-  artnet_in.forward(universe_in, leds, NUM_LEDS);
+  // artnet_in.forward(universe_in, leds, NUM_LEDS);
+  artnet_in.subscribe(universe_in, callback);
 
   // init led
   init_led();
